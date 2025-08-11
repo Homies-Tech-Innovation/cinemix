@@ -1,0 +1,7 @@
+[project]
+name = "cinemix"
+version = "0.1.0"
+description = "Cinemix is a streamlined app for effortless discovery of movies and shows."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []

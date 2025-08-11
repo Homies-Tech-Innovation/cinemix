@@ -28,14 +28,6 @@ jobs:
       pull-requests: write # To comment on the PR
     secrets: inherit
 
-  # Prettier runs only if JS/TS/etc. files changed (logic is inside the reusable workflow)
-  prettier-format:
-    uses: Homies-Tech-Innovation/.github/.github/workflows/prettier-format.yml@main
-    permissions:
-      contents: write # To commit formatting changes
-      pull-requests: write # To comment on the PR
-    secrets: inherit
-
   # Dependency update only runs on a schedule
   dependency-update:
     if: github.event_name == 'schedule'

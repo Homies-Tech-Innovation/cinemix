@@ -8,11 +8,11 @@
 
 <div align="center">
   <a href="https://github.com/Homies-Tech-Innovation/">
-    <img src="https://github.com/Homies-Tech-Innovation/.github/blob/main/profile/assets/logo.png?raw=true" alt="Logo" width="100" height="100">
+    <img src="./assets/logo.png" alt="Logo" width="100" height="100">
   </a>
-  <h3 align="center">Project Name</h3>
+  <h3 align="center">Cinemix</h3>
   <p align="center">
-    A short, compelling tagline
+    Cinemix is a streamlined app for effortless discovery of movies and shows.
     <br />
     <br />
     <a href="./.github/ISSUE_TEMPLATE/bug_report.yml">
