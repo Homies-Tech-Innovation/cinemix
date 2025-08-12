@@ -134,7 +134,7 @@ Distributed under the MIT License. See [`LICENSE`](./LICENSE) file for more info
 
 <h1></h1>
 <div align="center">
-  <img src="https://github.com/aditsuru-git/readme-template/blob/main/assets/footer.png?raw=true" alt="Footer Banner" width="100%" style="max-width: 1200px;">
+  <img src="https://github.com/aditsuru-git/readme-template/blob/main/assets/footer-team.png?raw=true" alt="Footer Banner" width="100%" style="max-width: 1200px;">
 </div>
 
 [contributors-shield]: https://img.shields.io/github/contributors/Homies-Tech-Innovation/cinemix
