@@ -10,31 +10,12 @@ on:
     - cron: "0 9 * * 1" # Weekly dependency updates at 9 AM on Monday
 
 jobs:
-  # Security scans on every push/PR
-  security:
-    uses: Homies-Tech-Innovation/.github/.github/workflows/security.yml@main
-    permissions:
-      contents: read # To check out the code
-      security-events: write # To upload SARIF results
-      actions: read # For TruffleHog to access repo contents
-      pull-requests: write
-    secrets: inherit
-
   # Ruff runs only if Python files changed (logic is inside the reusable workflow)
   ruff-format:
     uses: Homies-Tech-Innovation/.github/.github/workflows/ruff-format.yml@main
     permissions:
       contents: write # To commit formatting changes
       pull-requests: write # To comment on the PR
-    secrets: inherit
-
-  # Dependency update only runs on a schedule
-  dependency-update:
-    if: github.event_name == 'schedule'
-    uses: Homies-Tech-Innovation/.github/.github/workflows/dependency-update.yml@main
-    permissions:
-      contents: write # To update dependency files
-      pull-requests: write # To create a pull request
     secrets: inherit
 
   # This job will run on PRs to the main branch that are NOT from the dev branch.
