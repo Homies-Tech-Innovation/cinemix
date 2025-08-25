@@ -1,243 +1,194 @@
-# External API Integration – Cinemix
+## External API Integration – Cinemix
 
-This document explains how Cinemix integrates with the **TMDb API** to provide movie data, trailers, and search functionality.  
-It covers endpoints, caching, rate limiting handling, error responses, and the exact integration flow in our backend.
-
----
-
-## 🎯 Purpose
-
-Cinemix does not expose TMDb directly to the frontend.  
-Instead, our backend acts as a **proxy layer** with caching, error handling, and rate limiting strategies.  
-This ensures:  
-- Stable experience regardless of TMDb downtime  
-- Reduced API quota usage (via Redis cache)  
-- Consistent response format for frontend (using DTOs)
+This document explains how Cinemix integrates with the **OMDb API** to provide movie data and search functionality.
+It covers endpoints, rate limiting, error handling, and the integration flow within our backend.
 
 ---
 
-## 🔑 Key Points
+### Purpose
 
-- ✅ **API Key Security** → TMDb key hidden in backend (`.env`), never exposed to frontend  
-- ✅ **Unified Interface** → Cinemix apps only call `/api/search` & `/api/details`  
-- ✅ **Caching Layer** → Redis reduces TMDb requests, speeds up responses  
-- ✅ **Error Handling** → Centralized error messages and rate-limit handling  
-- ✅ **DTO Models** → All responses validated/structured with Pydantic models
+Cinemix does not expose OMDb directly to the frontend.
+Instead, the backend acts as a **proxy layer** with caching, error handling, and rate limiting strategies.
+This ensures:
 
----
-
-## 🌍 Endpoints Overview
-
-### 1️⃣ `/api/search`
-
-**Method:** `GET`  
-**Query Params:**  
-- `query` (string, required) → Search keyword  
-
-**Description:**  
-Returns an array of matching movies/shows from TMDb. Results cached for **1 hour** in Redis.
-
-**DTO:** `SearchResponse` (with nested `SearchResult` items)
-
-**Example Request:**  
-```http
-GET /api/search?query=Inception
-```
-
-**Example Response:**  
-```json
-{
-  "results": [
-    {
-      "id": 27205,
-      "title": "Inception",
-      "release_date": "2010-07-15",
-      "overview": "A thief who steals corporate secrets...",
-      "poster_path": "/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg"
-    }
-  ]
-}
-```
+- A stable user experience regardless of OMDb downtime
+- Reduced API quota usage (via Redis caching)
+- Consistent response formats for the frontend (using DTOs)
 
 ---
 
-### 2️⃣ `/api/details/{movie_id}`
+### Key Points
 
-**Method:** `GET`  
-**Path Param:**  
-- `movie_id` (integer, required) → TMDb movie ID  
-
-**Description:**  
-Returns **full details** for one movie (or show). Cached for **24 hours** in Redis.
-
-**DTO:** `MovieDetails`
-
-**Example Request:**  
-```http
-GET /api/details/27205
-```
-
-**Example Response:**  
-```json
-{
-  "id": 27205,
-  "title": "Inception",
-  "release_date": "2010-07-15",
-  "runtime": 148,
-  "genres": [
-    { "id": 28, "name": "Action" },
-    { "id": 878, "name": "Science Fiction" }
-  ],
-  "overview": "Cobb, a skilled thief..."
-}
-```
+- **Unified Interface** → Cinemix applications only call `/api/search` and `/api/details`
+- **Caching Layer** → Redis reduces OMDb requests and improves response times
+- **Error Handling** → Centralized error messages and rate-limit handling
+- **DTO Models** → All responses are validated and structured with Pydantic models
 
 ---
 
-### 3️⃣ `/api/trailer/{movie_id}` *(Optional / v2 Feature)*
+### OMDb API Endpoints
 
-**Method:** `GET`  
-**Path Param:**  
-- `movie_id` (integer, required) → TMDb movie ID  
+The API handles all requests at the same endpoint:
+`GET /api/`
 
-**Description:**  
-Fetches the official YouTube trailer link from TMDb video data.
+#### 1. Movie Search
 
-**DTO:** `TrailerResponse`
+- **Parameters**
 
-**Example Request:**  
-```http
-GET /api/trailer/27205
-```
+  - `s` — query
 
-**Example Response:**  
-```json
-{
-  "id": 27205,
-  "title": "Inception",
-  "trailer_url": "https://www.youtube.com/watch?v=YoHD9XEInc0"
-}
-```
-**Note:**
-   this is an optional feature
+- **Request Example**
+
+  ```
+  GET /api/?s=<query>&apikey=<api_key>
+  ```
+
+- **Response Example**
+
+  ```json
+  {
+  	"Search": [
+  		{
+  			"Title": "string",
+  			"Year": "string",
+  			"imdbID": "string",
+  			"Type": "string",
+  			"Poster": "string"
+  		}
+  	],
+  	"totalResults": "string",
+  	"Response": "string"
+  }
+  ```
+
+#### 2. Movie Details
+
+- **Parameters**
+
+  - `i` — IMDb ID
+
+- **Request Example**
+
+  ```
+  GET /api/?i=<query>&apikey=<api_key>
+  ```
+
+- **Response Example**
+
+  ```json
+  {
+  	"Title": "string",
+  	"Year": "string",
+  	"Rated": "string",
+  	"Released": "string",
+  	"Runtime": "string",
+  	"Genre": "string",
+  	"Director": "string",
+  	"Writer": "string",
+  	"Actors": "string",
+  	"Plot": "string",
+  	"Language": "string",
+  	"Country": "string",
+  	"Awards": "string",
+  	"Poster": "string",
+  	"Ratings": [
+  		{
+  			"Source": "string",
+  			"Value": "string"
+  		}
+  	],
+  	"Metascore": "string",
+  	"imdbRating": "string",
+  	"imdbVotes": "string",
+  	"imdbID": "string",
+  	"Type": "string",
+  	"totalSeasons": "string",
+  	"Response": "string"
+  }
+  ```
 
 ---
 
-## 🗄️ Caching Strategy
+### Environment Variables
 
-- **Search results** → Redis TTL = **1 hour**  
-- **Movie details** → Redis TTL = **24 hours**  
-- **Trailers** → Redis TTL = **24 hours**  
-
-**Cache Keys:**  
-- `search:{query}`  
-- `details:{movie_id}`  
-- `trailer:{movie_id}`  
-
----
-
-## 🔒 Security
-
-### 1️⃣ TMDb API Key
-
-- Store only in **backend environment variables** (`.env`, secrets manager, or Docker secrets).  
-- **Never expose** the key in frontend/mobile apps.  
-- All external calls must go through the **proxy layer only**.
-
-#### Example `.env`
 ```env
-TMDB_API_KEY=your_real_key_here
-TMDB_BASE_URL=https://api.themoviedb.org/3
-CACHE_TTL=86400
-```
-
-#### Load in Backend (Python Example)
-```python
-import os
-
-TMDB_KEY = os.getenv("TMDB_API_KEY")
-TMDB_BASE_URL = os.getenv("TMDB_BASE_URL", "https://api.themoviedb.org/3")
-CACHE_TTL = int(os.getenv("CACHE_TTL", 86400))
+OMDb_API_KEY=your_real_key_here
+OMDb_BASE_URL=http://www.omdbapi.com/
 ```
 
 ---
 
-## ❌ Error Handling
+### Error Handling
 
-All errors are normalized by the Cinemix API layer.  
-Frontend never sees raw TMDb errors — only standardized JSON.
+All errors are standardized by the Cinemix API layer.
+The frontend never receives raw OMDb errors — only normalized JSON responses.
 
-### Common Error Responses
+#### Common OMDb Error Responses
 
 1. **Invalid Request**
-```json
-{
-  "error": "Invalid request",
-  "message": "Query parameter 'query' is required."
-}
-```
+
+   ```json
+   {
+   	"Response": "False",
+   	"Error": "..."
+   }
+   ```
+
+   - **Status Code**: `200`
 
 2. **Not Found**
-```json
-{
-  "error": "Not Found",
-  "message": "Movie with ID 99999999 not found."
-}
-```
 
-3. **TMDb Rate Limit Exceeded**
-```json
-{
-  "error": "Rate Limit",
-  "message": "Too many requests to TMDb. Please try again later."
-}
-```
+   ```json
+   {
+   	"Response": "False",
+   	"Error": "Movie not found!"
+   }
+   ```
 
-4. **Internal Server Error**
-```json
-{
-  "error": "Server Error",
-  "message": "Unexpected error occurred. Please contact support."
-}
-```
+   - **Status Code**: `200`
 
-**Design Decisions:**  
-- Centralized exception handling in FastAPI middleware  
-- TMDb raw errors never leak to client apps  
-- Consistent error structure → always:  
-```json
-{ "error": string, "message": string }
-```
+3. **Rate Limit Exceeded**
 
----
+   ```json
+   {
+   	"Response": "False",
+   	"Error": "..."
+   }
+   ```
 
-## ⚖️ Rate Limiting Note
+   - **Status Code**: `429`
 
-- TMDb Free Tier: **40 requests / 10 seconds / IP**  
-- Cinemix includes an **internal sliding window rate limiter** (educational) to simulate production-ready handling.  
-- Requests beyond limit return:  
-```json
-{
-  "error": "Rate Limit",
-  "message": "Too many requests to Cinemix API."
-}
-```
+4. **Invalid or Missing API Key**
+
+   ```json
+   {
+   	"Response": "False",
+   	"Error": "No API key provided."
+   }
+   ```
+
+   - **Status Code**: `401`
 
 ---
 
-## 📊 Architecture Diagram
+### Rate Limiting
+
+- OMDb Free Tier: **1,000 requests per day**
+
+---
+
+### Architecture Overview
 
 ```
-[Frontend App]  →  [Cinemix API Layer]  →  [Redis Cache] 
+[Frontend App]  →  [Cinemix API Layer]  →  [Redis Cache]
                                    ↓
-                              [TMDb API]
+                              [OMDb API]
 ```
 
 ---
 
-## 📝 Important Notes
+### Important Notes
 
-- Always **read this documentation first** before implementing or modifying API integration code.  
-- Keep **DTOs and docs in sync** — if you change a field in code, update this file.  
-- Never hardcode API keys or base URLs — always use environment variables. 
-
+- Always review this documentation before implementing or modifying API integration code.
+- Keep **DTOs and documentation synchronized** — if you change a field in code, update this file.
+- Never hardcode API keys or base URLs — always use environment variables.
