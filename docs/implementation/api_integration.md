@@ -1,3 +1,130 @@
+## Backend API (Internal)
+
+### Versioning & Base URL
+
+- **Base Path**: `/api/v1`
+- **Future Versions**: `/api/v2` (only for breaking changes)
+- **Environments (examples):**
+
+  - Local: `http://localhost:8000/api/v1`
+  - Production: `https://api.example.com/api/v1`
+
+---
+
+### Data Conventions (DTOs)
+
+#### Response Shape
+
+```python
+from enum import Enum
+from pydantic import BaseModel
+from typing import Dict, Any
+
+class ResponseStatus(str, Enum):
+    SUCCESS = "success"
+    ERROR = "error"
+
+class Response(BaseModel):
+    status: ResponseStatus
+    data: Dict[str, Any]
+    message: str
+```
+
+---
+
+### Endpoints
+
+#### 1. Search by Title
+
+- **Endpoint:**
+  `GET /api/v1/search/`
+
+- **Query Parameters:**
+
+  - `query: str`
+
+- **Response DTO:**
+
+```python
+from typing import List
+from pydantic import BaseModel
+
+class SearchResult(BaseModel):
+    title: str
+    year: str
+    id: str
+    type: str
+    poster: str
+
+class SearchData(BaseModel):
+    search_results: List[SearchResult]
+    total_results: str
+```
+
+---
+
+#### 2. Search by ID
+
+- **Endpoint:**
+  `GET /api/v1/search/id/`
+
+- **Query Parameters:**
+
+  - `id: str`
+
+- **Response DTO:**
+
+```python
+from pydantic import BaseModel
+
+class MovieDetails(BaseModel):
+    id: str
+    title: str
+    year: str
+    runtime: str
+    genre: str
+    director: str
+    writer: str
+    actors: str
+    plot: str
+    country: str
+    poster: str
+    imdb_rating: str
+    total_seasons: str
+```
+
+---
+
+### Error Handling
+
+FastAPI provides a built-in error handler, which can be customized.
+
+#### Example Custom Handler
+
+```python
+from fastapi import Request, HTTPException
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(HTTPException)
+def http_exc_handler(req: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error_code": str(exc.status_code), "message": exc.detail}
+    )
+```
+
+#### Error Response DTO
+
+```python
+from pydantic import BaseModel
+
+class ErrorResponse(BaseModel):
+    error_code: str
+    message: str
+```
+
+---
+
 ## External API Integration – Cinemix
 
 This document explains how Cinemix integrates with the **OMDb API** to provide movie data and search functionality.
