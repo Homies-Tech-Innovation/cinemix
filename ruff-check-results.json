@@ -1,0 +1,36 @@
+Installed 1 package in 2ms
+[
+  {
+    "cell": null,
+    "code": "F841",
+    "end_location": {
+      "column": 30,
+      "row": 21
+    },
+    "filename": "/home/runner/work/cinemix/cinemix/src/config.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 30,
+            "row": 21
+          },
+          "location": {
+            "column": 23,
+            "row": 21
+          }
+        }
+      ],
+      "message": "Remove assignment to unused variable `err`"
+    },
+    "location": {
+      "column": 27,
+      "row": 21
+    },
+    "message": "Local variable `err` is assigned to but never used",
+    "noqa_row": 21,
+    "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  }
+]
