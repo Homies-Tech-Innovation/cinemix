@@ -4,4 +4,10 @@ version = "0.1.0"
 description = "Cinemix is a streamlined app for effortless discovery of movies and shows."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "fastapi>=0.116.1",
+    "pydantic>=2.11.7",
+    "pydantic-settings>=2.10.1",
+    "python-dotenv>=1.1.1",
+    "uvicorn>=0.35.0",
+]
