@@ -65,5 +65,22 @@ Installed 1 package in 1ms
     "message": "`src.config.settings` imported but unused",
     "noqa_row": 3,
     "url": "https://docs.astral.sh/ruff/rules/unused-import"
+  },
+  {
+    "cell": null,
+    "code": "E741",
+    "end_location": {
+      "column": 10,
+      "row": 102
+    },
+    "filename": "/home/runner/work/cinemix/cinemix/src/utils/logger.py",
+    "fix": null,
+    "location": {
+      "column": 9,
+      "row": 102
+    },
+    "message": "Ambiguous variable name: `l`",
+    "noqa_row": 102,
+    "url": "https://docs.astral.sh/ruff/rules/ambiguous-variable-name"
   }
 ]

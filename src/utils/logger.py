@@ -6,11 +6,11 @@ from logging.handlers import RotatingFileHandler
 from typing import Optional
 
 LOG_COLORS = {
-    "DEBUG": "\033[94m",    # Blue
-    "INFO": "\033[92m",     # Green
+    "DEBUG": "\033[94m",  # Blue
+    "INFO": "\033[92m",  # Green
     "WARNING": "\033[93m",  # Yellow
-    "ERROR": "\033[91m",    # Red
-    "CRITICAL": "\033[95m", # Magenta
+    "ERROR": "\033[91m",  # Red
+    "CRITICAL": "\033[95m",  # Magenta
 }
 RESET_COLOR = "\033[0m"
 
@@ -57,6 +57,7 @@ def setup_logging(
     class JSONFormatter(logging.Formatter):
         def format(self, record):
             import json as _json
+
             base = {
                 "ts": self.formatTime(record, datefmt),
                 "level": record.levelname,
@@ -71,7 +72,11 @@ def setup_logging(
                 base["exc_info"] = self.formatException(record.exc_info)
             return _json.dumps(base, ensure_ascii=False)
 
-    formatter = JSONFormatter(datefmt=datefmt) if use_json else ColoredFormatter(fmt_plain, datefmt=datefmt)
+    formatter = (
+        JSONFormatter(datefmt=datefmt)
+        if use_json
+        else ColoredFormatter(fmt_plain, datefmt=datefmt)
+    )
 
     # --- Handlers ---
     console_handler = logging.StreamHandler(sys.stdout)
@@ -82,13 +87,17 @@ def setup_logging(
         log_file, maxBytes=5_000_000, backupCount=5, encoding="utf-8"
     )
     file_handler.setFormatter(
-        JSONFormatter(datefmt=datefmt) if use_json else logging.Formatter(fmt_plain, datefmt=datefmt)
+        JSONFormatter(datefmt=datefmt)
+        if use_json
+        else logging.Formatter(fmt_plain, datefmt=datefmt)
     )
     file_handler.setLevel(level_name)
 
     # --- Root logger ---
     root = logging.getLogger()
-    root.setLevel(getattr(logging, level_name, logging.DEBUG))  # that roo thing Fixed here
+    root.setLevel(
+        getattr(logging, level_name, logging.DEBUG)
+    )  # that roo thing Fixed here
 
     # Remove existing handlers (avoid duplicates with --reload)
     for h in list(root.handlers):
