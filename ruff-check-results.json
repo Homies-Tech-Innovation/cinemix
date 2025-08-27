@@ -1,11 +1,11 @@
-Installed 1 package in 2ms
+Installed 1 package in 1ms
 [
   {
     "cell": null,
     "code": "F841",
     "end_location": {
       "column": 30,
-      "row": 21
+      "row": 46
     },
     "filename": "/home/runner/work/cinemix/cinemix/src/config.py",
     "fix": {
@@ -15,11 +15,11 @@ Installed 1 package in 2ms
           "content": "",
           "end_location": {
             "column": 30,
-            "row": 21
+            "row": 46
           },
           "location": {
             "column": 23,
-            "row": 21
+            "row": 46
           }
         }
       ],
@@ -27,10 +27,43 @@ Installed 1 package in 2ms
     },
     "location": {
       "column": 27,
-      "row": 21
+      "row": 46
     },
     "message": "Local variable `err` is assigned to but never used",
-    "noqa_row": 21,
+    "noqa_row": 46,
     "url": "https://docs.astral.sh/ruff/rules/unused-variable"
+  },
+  {
+    "cell": null,
+    "code": "F401",
+    "end_location": {
+      "column": 32,
+      "row": 3
+    },
+    "filename": "/home/runner/work/cinemix/cinemix/src/main.py",
+    "fix": {
+      "applicability": "safe",
+      "edits": [
+        {
+          "content": "",
+          "end_location": {
+            "column": 1,
+            "row": 4
+          },
+          "location": {
+            "column": 1,
+            "row": 3
+          }
+        }
+      ],
+      "message": "Remove unused import: `src.config.settings`"
+    },
+    "location": {
+      "column": 24,
+      "row": 3
+    },
+    "message": "`src.config.settings` imported but unused",
+    "noqa_row": 3,
+    "url": "https://docs.astral.sh/ruff/rules/unused-import"
   }
 ]
