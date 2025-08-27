@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# from src.config import settings
+from src.config import settings
 
 # Router imports
 from src.routes import search
