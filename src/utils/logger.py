@@ -1,122 +1,97 @@
 # src/utils/logger.py
 import logging
-import os
 import sys
-from logging.handlers import RotatingFileHandler
+import os
+import json as _json
 from typing import Optional
-
-LOG_COLORS = {
-    "DEBUG": "\033[94m",  # Blue
-    "INFO": "\033[92m",  # Green
-    "WARNING": "\033[93m",  # Yellow
-    "ERROR": "\033[91m",  # Red
-    "CRITICAL": "\033[95m",  # Magenta
-}
-RESET_COLOR = "\033[0m"
-
-_app_logger = None  # Singleton to prevent multiple initializations
-
-
-def _to_bool(val: object, default: bool = False) -> bool:
-    if val is None:
-        return default
-    s = str(val).strip().lower()
-    return s in {"1", "true", "yes", "y", "on"}
+from src.config import settings
+# Singleton logger
+_logger: Optional[logging.Logger] = None
 
 
 def setup_logging(
     app_name: str = "cinemix",
     level: Optional[str] = None,
     json: Optional[bool] = None,
-    log_file: Optional[str] = None,
 ) -> logging.Logger:
     """
-    Setup application-wide logging.
+    Configure global logging:
+    - Console always enabled
+    - Optional file logging
+    - JSON or plain text format
     """
-    global _app_logger
-    if _app_logger:
-        return _app_logger
+    global _logger
+    if _logger:
+        return _logger
 
-    # --- Config values ---
-    level_name = (level or os.getenv("LOG_LEVEL", "DEBUG")).upper()
-    use_json = _to_bool(json if json is not None else os.getenv("LOG_JSON", "false"))
-    log_file = log_file or os.getenv("LOG_FILE", "logs/cinemix.log")
-
-    os.makedirs(os.path.dirname(log_file), exist_ok=True)
+    # --- Config ---
+    level_name = (level or settings.LOG_LEVEL).upper()
+    use_json = json if json is not None else settings.LOG_JSON
+    log_file = settings.LOG_FILE
+    datefmt = "%Y-%m-%d %H:%M:%S"
 
     # --- Formatters ---
-    datefmt = "%Y-%m-%d %H:%M:%S"
-    fmt_plain = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-
-    class ColoredFormatter(logging.Formatter):
-        def format(self, record):
-            msg = super().format(record)
-            color = LOG_COLORS.get(record.levelname, "")
-            return f"{color}{msg}{RESET_COLOR}" if not use_json else msg
+    class PlainFormatter(logging.Formatter):
+        def format(self, record: logging.LogRecord) -> str:
+            fmt = "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+            formatter = logging.Formatter(fmt, datefmt=datefmt)
+            return formatter.format(record)
 
     class JSONFormatter(logging.Formatter):
-        def format(self, record):
-            import json as _json
-
-            base = {
+        def format(self, record: logging.LogRecord) -> str:
+            log_obj = {
                 "ts": self.formatTime(record, datefmt),
                 "level": record.levelname,
                 "logger": record.name,
                 "msg": record.getMessage(),
-                # Optional debug fields:
-                # "file": record.filename,
-                # "line": record.lineno,
-                # "func": record.funcName,
             }
             if record.exc_info:
-                base["exc_info"] = self.formatException(record.exc_info)
-            return _json.dumps(base, ensure_ascii=False)
+                log_obj["exc_info"] = self.formatException(record.exc_info)
+            return _json.dumps(log_obj, ensure_ascii=False)
 
-    formatter = (
-        JSONFormatter(datefmt=datefmt)
-        if use_json
-        else ColoredFormatter(fmt_plain, datefmt=datefmt)
-    )
-
-    # --- Handlers ---
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(formatter)
-    console_handler.setLevel(level_name)
-
-    file_handler = RotatingFileHandler(
-        log_file, maxBytes=5_000_000, backupCount=5, encoding="utf-8"
-    )
-    file_handler.setFormatter(
-        JSONFormatter(datefmt=datefmt)
-        if use_json
-        else logging.Formatter(fmt_plain, datefmt=datefmt)
-    )
-    file_handler.setLevel(level_name)
+    formatter = JSONFormatter(datefmt=datefmt) if use_json else PlainFormatter()
 
     # --- Root logger ---
     root = logging.getLogger()
-    root.setLevel(
-        getattr(logging, level_name, logging.DEBUG)
-    )  # that roo thing Fixed here
+    root.setLevel(logging.DEBUG)  # capture all levels
 
-    # Remove existing handlers (avoid duplicates with --reload)
+    # Clear old handlers
     for h in list(root.handlers):
         root.removeHandler(h)
 
-    root.addHandler(console_handler)
-    root.addHandler(file_handler)
+    # Console handler
+    console = logging.StreamHandler(sys.stdout)
+    console.setLevel(getattr(logging, level_name, logging.INFO))
+    console.setFormatter(formatter)
 
-    # --- Apply to Uvicorn & FastAPI loggers ---
+    # Windows UTF-8 safe
+    reconf = getattr(console.stream, "reconfigure", None)
+    if callable(reconf):
+        reconf(encoding="utf-8")
+
+    root.addHandler(console)
+
+    # File handler (optional)
+    if log_file:
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        file_handler = logging.FileHandler(log_file, encoding="utf-8")
+        file_handler.setLevel(getattr(logging, level_name, logging.INFO))
+        file_handler.setFormatter(formatter)
+        root.addHandler(file_handler)
+
+    # Align Uvicorn/FastAPI loggers
     for name in ("uvicorn", "uvicorn.error", "uvicorn.access", "fastapi"):
-        l = logging.getLogger(name)
-        l.handlers = [console_handler, file_handler]
-        l.setLevel(logging.WARNING)  # Lower noise, keep serious logs
-        l.propagate = False
+        log = logging.getLogger(name)
+        log.setLevel(getattr(logging, level_name, logging.INFO))
+        log.propagate = True
 
-    # --- App logger ---
-    app_logger = logging.getLogger(app_name)
-    app_logger.setLevel(level_name)
-    app_logger.info("Logger initialized ✅")
+    # App-specific logger
+    _logger = logging.getLogger(app_name)
+    _logger.setLevel(getattr(logging, level_name, logging.INFO))
+    _logger.debug("Logger initialized", extra={"app": app_name, "json": use_json})
 
-    _app_logger = app_logger
-    return app_logger
+    return _logger
+
+
+# Auto-init singleton
+logger = setup_logging()
