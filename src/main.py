@@ -10,7 +10,7 @@ from src.utils.logger import setup_logging
 
 
 # Initialize logger
-logger = setup_logging("cinemix")  # App-wide logger
+from src.utils import logger
 
 # App intialization
 app = FastAPI()
