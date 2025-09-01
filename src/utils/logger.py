@@ -5,6 +5,7 @@ import os
 import json as _json
 from typing import Optional
 from src.config import settings
+
 # Singleton logger
 _logger: Optional[logging.Logger] = None
 
