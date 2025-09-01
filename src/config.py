@@ -47,5 +47,5 @@ class Settings(BaseSettings):
 try:
     settings = Settings()  # type:ignore
 except ValidationError as err:
-    logger.error(f"Error while parsing enviornment variables: {err}")
+    logger.error(f"Error while parsing environment variables: \n{err}")
     sys.exit(1)
