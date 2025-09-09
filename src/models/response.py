@@ -17,12 +17,12 @@ class Response(BaseModel):
     Base response model for all Cinemix API responses.
     """
 
-    status: ResponseStatus
-    data: Optional[Dict[str, Any]] = None
     message: str
+    data: Optional[Dict[str, Any]] = None
+    status: ResponseStatus
 
 
 class ErrorResponse(Response):
     error_code: str
-    status: ResponseStatus = ResponseStatus.ERROR
     data: Optional[Dict[str, Any]] = None
+    status: ResponseStatus = ResponseStatus.ERROR
