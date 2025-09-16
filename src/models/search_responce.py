@@ -1,13 +1,15 @@
 # src/models/search_responce.py
 from pydantic import BaseModel, Field, ConfigDict, field_validator
 from typing import List
-from src.models.movie_details import SearchResult  
+from src.models.movie_details import SearchResult
+
 
 # calling from movie_detail to prevent duplication
 class SearchData(BaseModel):
     """
     Represents the search response payload from the Cinemix API.
     """
+
     search_results: List[SearchResult] = Field(
         ..., alias="Search", description="List of search results"
     )
@@ -35,6 +37,4 @@ class SearchData(BaseModel):
         return v
 
     # model config
-    model_config = ConfigDict(
-        validate_by_name=True
-    )
+    model_config = ConfigDict(validate_by_name=True)
