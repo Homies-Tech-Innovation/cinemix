@@ -30,3 +30,4 @@ class MovieDetails(BaseModel):
     poster: Optional[str] = Field(None, alias="Poster")
     imdb_rating: Optional[str] = Field(None, alias="imdbRating")
     total_seasons: Optional[str] = Field(None, alias="totalSeasons")
+    response: str = Field(..., alias="Response")
