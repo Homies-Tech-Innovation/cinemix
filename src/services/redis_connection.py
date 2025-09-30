@@ -7,10 +7,10 @@ class RedisClient:
     def __init__(self):
         # Redis client using env vars from src/config.py
         self.client = redis.from_url(
-            str(settings.REDIS_URL),   # AnyUrl → str
+            str(settings.REDIS_URL),  # AnyUrl → str
             password=settings.REDIS_PASSWORD,
             db=settings.REDIS_DB,
-            decode_responses=True,     # ensures str, not bytes
+            decode_responses=True,  # ensures str, not bytes
         )
 
     async def check_connection(self):
