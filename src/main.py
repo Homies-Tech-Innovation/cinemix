@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
@@ -10,14 +11,23 @@ from src.utils.logger import setup_logging
 from src.utils import logger
 
 # Redis client
-from src.services.redis_service import redis_client
+from src.services import redis_client
 
 
 # Initialize logger
 setup_logging()
 
+
+# Run Redis health check on startup
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await redis_client.check_connection()
+    yield
+    await redis_client.client.close()
+
+
 # App initialization
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -29,13 +39,6 @@ app.add_middleware(
 
 # Setup routers
 app.include_router(search.router, prefix="/api/v1")
-
-
-# Run Redis health check on startup
-@app.on_event("startup")
-async def startup_event():
-    await redis_client.check_connection()
-
 
 # Optional: startup log
 logger.info("FastAPI app initialized and routers configured ✅")
