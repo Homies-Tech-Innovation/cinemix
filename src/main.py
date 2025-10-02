@@ -11,7 +11,7 @@ from src.utils.logger import setup_logging
 from src.utils import logger
 
 # Redis client
-from src.services import redis_client
+from src.redis import redis_client
 
 
 # Initialize logger

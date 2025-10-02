@@ -1,1 +1,1 @@
-from src.services.redis_connection import redis_client
+from src.services.cache_service import cache_service
