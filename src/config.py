@@ -43,6 +43,10 @@ class Settings(BaseSettings):
         env_file = ".env"
         env_file_encoding = "utf-8"
 
+    # OMDb Client Variables
+    OMDb_BASE_URL: str = Field(..., min_length=1)
+    OMDb_API_KEY: str = Field(..., min_length=1)
+
 
 try:
     settings = Settings()  # type:ignore
