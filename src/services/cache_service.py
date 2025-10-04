@@ -32,4 +32,4 @@ class CacheService:
         return None
 
 
-cache_service = CacheService
+cache_service = CacheService()
