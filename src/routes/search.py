@@ -9,7 +9,7 @@ import time
 router = APIRouter(prefix="/search", tags=["Search"])
 
 
-@router.get("/") 
+@router.get("/")
 async def search_movies(
     request: Request,
     title: str = Query(..., min_length=1, description="Movie title to search"),
@@ -41,7 +41,7 @@ async def search_movies(
         return JSONResponse(
             content=error_model.model_dump(),
             status_code=429,
-            headers={"Retry-After": str(int(wait_time))}
+            headers={"Retry-After": str(int(wait_time))},
         )
 
     try:
@@ -50,12 +50,15 @@ async def search_movies(
         logger.info(f"OMDb search for '{title}' page={page}, status_code={status_code}")
 
         # --- Parse and map response ---
-        response_model = response_parser.parse_response(data, status_code, Endpoint.SEARCH)
-        http_status_code = 200 if response_model.status == ResponseStatus.SUCCESS else 400
+        response_model = response_parser.parse_response(
+            data, status_code, Endpoint.SEARCH
+        )
+        http_status_code = (
+            200 if response_model.status == ResponseStatus.SUCCESS else 400
+        )
 
         return JSONResponse(
-            content=response_model.model_dump(),
-            status_code=http_status_code
+            content=response_model.model_dump(), status_code=http_status_code
         )
 
     except Exception as e:
@@ -65,7 +68,4 @@ async def search_movies(
             error_code="INTERNAL_ERROR",
             status=ResponseStatus.ERROR,
         )
-        return JSONResponse(
-            content=error_model.model_dump(),
-            status_code=500
-        )
+        return JSONResponse(content=error_model.model_dump(), status_code=500)

@@ -5,8 +5,6 @@ from src.utils import logger
 
 
 class OmdbClient:
-     
-
     def __init__(self):
         self.timeout = httpx.Timeout(connect=5.0, read=10.0)
         self.client = httpx.Client(timeout=self.timeout)
@@ -16,6 +14,7 @@ class OmdbClient:
     @staticmethod
     def error_handler(fn):
         """Decorator to handle HTTP errors"""
+
         @wraps(fn)
         def wrapper(*args, **kwargs):
             try:
@@ -32,6 +31,7 @@ class OmdbClient:
             except Exception as e:
                 logger.exception(f"Unexpected OMDb client error: {e}")
                 return {"Response": "False", "Error": str(e)}, 500
+
         return wrapper
 
     @error_handler
