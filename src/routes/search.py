@@ -9,7 +9,7 @@ import time
 router = APIRouter(prefix="/search", tags=["Search"])
 
 
-@router.get("/")
+@router.get("/") 
 async def search_movies(
     request: Request,
     title: str = Query(..., min_length=1, description="Movie title to search"),

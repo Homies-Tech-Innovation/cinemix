@@ -5,7 +5,7 @@ from src.utils import logger
 
 
 class OmdbClient:
-    
+     
 
     def __init__(self):
         self.timeout = httpx.Timeout(connect=5.0, read=10.0)
