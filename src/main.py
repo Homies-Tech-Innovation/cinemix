@@ -1,5 +1,6 @@
+# FastAPI imports
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import settings
 
@@ -7,15 +8,13 @@ from src.config import settings
 from src.routes import search
 
 # logger imports
-from src.utils.logger import setup_logging
 from src.utils import logger
 
 # Redis client
 from src.redis import redis_client
 
-
-# Initialize logger
-setup_logging()
+# Middleware imports
+from src.middlewares import rate_limiter_middleware
 
 
 # Run Redis health check on startup
@@ -23,7 +22,6 @@ setup_logging()
 async def lifespan(app: FastAPI):
     await redis_client.check_connection()
     yield
-    await redis_client.client.close()
 
 
 # App initialization
@@ -36,6 +34,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+# Setup rate limiter middleware
+@app.middleware("http")
+async def rate_limiter_middleware_wrapper(request: Request, call_next):
+    return await rate_limiter_middleware(request, call_next)
+
 
 # Setup routers
 app.include_router(search.router, prefix="/api/v1")
