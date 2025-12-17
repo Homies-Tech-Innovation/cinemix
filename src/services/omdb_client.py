@@ -5,7 +5,7 @@ from functools import wraps
 
 class OmdbClient:
     def __init__(self):
-        self.timeout = httpx.Timeout(connect=5.0, read=10.0)
+        self.timeout = httpx.Timeout(connect=5.0, read=10.0, write=10.0, pool=10.0) # change timeouts as needed
         self.client = httpx.Client(timeout=self.timeout)
         self.url = settings.OMDb_BASE_URL
         self.api_key = settings.OMDb_API_KEY
