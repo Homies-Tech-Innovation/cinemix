@@ -17,5 +17,5 @@ async def get_movie(movie_id: str):
             f"Cache hit for endpoint: {Endpoint.MOVIE_DETAILS}, movie id: {movie_id}"
         )
     return response_parser.parse_response(
-        cache.model_dump(), 200, Endpoint.MOVIE_DETAILS
+        cache.model_dump(by_alias=True), 200, Endpoint.MOVIE_DETAILS
     )
