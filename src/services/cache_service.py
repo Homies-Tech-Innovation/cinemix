@@ -13,7 +13,7 @@ class CacheService:
         """
         await redis_client.client.set(
             f"movie_{movie_id}",
-            json.dumps(movie_obj.model_dump()),
+            json.dumps(movie_obj.model_dump(by_alias=True)),
             ex=settings.CACHE_TTL,
         )
 
