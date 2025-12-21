@@ -13,14 +13,12 @@ async def get_movie(movie_id: str):
             movie = MovieDetails(**data)
             await cache_service.cache_movie(movie_id, movie)
             f"Cache miss for endpoint: {Endpoint.MOVIE_DETAILS}, caching movie id: {movie_id}"
-            return response_parser.parse_response(data, status_code, Endpoint.MOVIE_DETAILS)
         else:
             logger.error(
                 f"OMDB API returned an error for movie id: {movie_id}, error: {data.get('Error')}"
             )
-            return response_parser.parse_response(
-                data, status_code, Endpoint.MOVIE_DETAILS
-            )
+            
+        return response_parser.parse_response(data, status_code, Endpoint.MOVIE_DETAILS)
     else:
         logger.info(
             f"Cache hit for endpoint: {Endpoint.MOVIE_DETAILS}, movie id: {movie_id}"
