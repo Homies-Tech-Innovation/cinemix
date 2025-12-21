@@ -9,7 +9,7 @@ async def get_movie(movie_id: str):
     if not isinstance(cache, MovieDetails):
         data, status_code = omdb_client.fetch_details(movie_id=movie_id)
         
-        if not data.get("Response") == "False":
+        if data.get("Response") != "False":
             movie = MovieDetails(**data)
             await cache_service.cache_movie(movie_id, movie)
             f"Cache miss for endpoint: {Endpoint.MOVIE_DETAILS}, caching movie id: {movie_id}"
