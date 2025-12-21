@@ -35,3 +35,4 @@ async def get_movie(movie_id: str):
         data,
         status_code,
         Endpoint.MOVIE_DETAILS,
+    )
