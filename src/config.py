@@ -1,7 +1,6 @@
 from pydantic_settings import BaseSettings
 from pydantic import ValidationError, AnyUrl, Field, model_validator
 from typing import List, Literal
-from src.utils import logger
 import sys
 
 
@@ -51,5 +50,6 @@ class Settings(BaseSettings):
 try:
     settings = Settings()  # type:ignore
 except ValidationError as err:
+    from src.utils import logger
     logger.error(f"Error while parsing environment variables: \n{err}")
     sys.exit(1)
